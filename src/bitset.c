@@ -10,11 +10,18 @@ bitset Bitset(u_int nbits)
 	return set;
 }
 
-void resize_bitset(bitset set, u_int size)
+#ifdef NDEBUG
+bitset resize_bitset(bitset set, u_int size)
+#else
+bitset resize_bitset(bitset set, u_int size)
+#endif
 {
 	set = (bitset) realloc(set - 1, size + sizeof(_word_t)) + 1;
 	set_subset(set, BITSET_SIZE(set), size, 0);
 	*(set - 1) = size;
+#ifdef NDEBUG
+	return set;
+#endif
 }
 
 bitset copy_bitset(bitset original)
@@ -30,7 +37,11 @@ bitset copy_bitset(bitset original)
 	return copy;
 }
 
-void set_subset(bitset set, u_int from, u_int to, bool state)
+#ifdef NDEBUG
+bitset set_subset(bitset set, u_int from, u_int to, bool state)
+#else
+bitset set_subset(bitset set, u_int from, u_int to, bool state)
+#endif
 {
 	if (to > (BITSET_SIZE(set) - 1))
 		to = BITSET_SIZE(set);
@@ -60,9 +71,16 @@ void set_subset(bitset set, u_int from, u_int to, bool state)
 			}
 		}
 	}
+#ifdef NDEBUG
+	return set;
+#endif
 }
 
+#ifdef NDEBUG
+bitset shift_bitset(bitset set, int width)
+#else
 void shift_bitset(bitset set, int width)
+#endif
 {
 	size_t len = _B_INDEX(BITSET_SIZE(set)), i;
 	_word_t shift[2] = {0, 0};
@@ -89,6 +107,9 @@ void shift_bitset(bitset set, int width)
 		} while (++i < len);
 		set[i - 1] = shift[1];
 	}
+#ifdef NDEBUG
+	return set;
+#endif
 }
 
 bool compare_bitsets(bitset s1, bitset s2)
@@ -135,7 +156,7 @@ bitset bitwise_and(bitset s1, bitset s2)
 {
 	size_t min_len = _MIN(_B_INDEX(BITSET_SIZE(s1)), _B_INDEX(BITSET_SIZE(s2))),
 	       i = -1;
-	bitset set_and = Bitset(_MAX(_B_INDEX(BITSET_SIZE(s1)), _B_INDEX(BITSET_SIZE(s2))));
+	bitset set_and = Bitset(_MAX(BITSET_SIZE(s1), BITSET_SIZE(s2)));
 
 	while (++i <= min_len)
 		set_and[i] = s1[i] & s2[i];
